@@ -9,7 +9,7 @@ export const ROUTES = [
 ] as const;
 
 export const ROUTE_TO_ICON_MAP = {
-  [ROUTE_AUDIT_FORM]: 'audit',
+  [ROUTE_AUDIT_FORM]: 'test-tube',
   [ROUTE_AUDIT_HISTORY]: 'history',
-  [ROUTE_SETTINGS]: 'setting',
+  [ROUTE_SETTINGS]: 'account-settings',
 };

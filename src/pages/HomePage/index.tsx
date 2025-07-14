@@ -8,7 +8,7 @@ import { Settings } from './components/Settings';
 import { History } from './components/History';
 import { Audit } from './components/Audit';
 import { T_User } from '../../types/user';
-import Icon from 'react-native-vector-icons/AntDesign';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export type T_Route = {
   key: (typeof ROUTES)[number];
