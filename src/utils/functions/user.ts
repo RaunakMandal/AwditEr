@@ -55,7 +55,7 @@ export const isUserAllowedForRoute = (
   const USER_ACTION_TO_PERMISSION_MAP: {
     [key in (typeof ROUTES)[number]]: (typeof USER_ROLES)[number][];
   } = {
-    audit: ['auditor', 'admin'],
+    audit: ['auditor'],
     history: ['admin', 'auditor', 'viewer'],
     settings: ['admin', 'auditor', 'viewer'],
   };

@@ -7,8 +7,9 @@ import { CameraView } from './Camera';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUDIT_DATA_ASYNC_KEY } from '../../../utils/constants';
 import { Rating } from 'react-native-ratings';
+import { T_User } from '../../../types/user';
 
-export const Audit = () => {
+export const Audit = ({ user }: { user: T_User }) => {
   const [expandedId, setExpandedId] = useState<string>('details');
   const [auditData, setAuditData] = useState<Partial<T_Audit> | null>();
   const [errors, setErrors] = useState<string[]>([]);
@@ -96,10 +97,17 @@ export const Audit = () => {
         ? JSON.parse(getExistingData)
         : [];
 
-      console.log('Existing audit data:', existingData);
       await AsyncStorage.setItem(
         AUDIT_DATA_ASYNC_KEY,
-        JSON.stringify([...existingData, auditData]),
+        JSON.stringify([
+          ...existingData,
+          {
+            ...auditData,
+            id: Date.now().toString(),
+            userId: user.id,
+            timestamp: new Date(),
+          } as T_Audit,
+        ]),
       );
       console.log(JSON.stringify([...existingData, auditData]));
       console.log('Audit data saved successfully');

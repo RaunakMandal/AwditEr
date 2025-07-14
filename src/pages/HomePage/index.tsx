@@ -34,9 +34,9 @@ export const HomePage = ({ user }: { user: T_User }) => {
   const renderScene = ({ route }: { route: T_Route }) => {
     switch (route.key) {
       case 'audit':
-        return <Audit />;
+        return <Audit user={user} />;
       case 'history':
-        return <History />;
+        return <History user={user} />;
       case 'settings':
         return <Settings />;
       default:

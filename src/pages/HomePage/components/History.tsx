@@ -1,4 +1,4 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Divider, List, Text } from 'react-native-paper';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,10 +6,13 @@ import { AUDIT_DATA_ASYNC_KEY } from '../../../utils/constants';
 import { Fragment, useEffect, useState } from 'react';
 import { T_Audit } from '../../../types/audit';
 import { GenericModal } from '../../../components/GenericModal';
+import { T_User } from '../../../types/user';
 
-export const History = () => {
+export const History = ({ user }: { user: T_User }) => {
   const [history, setHistory] = useState<T_Audit[]>([]);
   const [modalItem, setModalItem] = useState<T_Audit | null>(null);
+
+  const canUserDelete = user.roles.includes('admin');
   useEffect(() => {
     const fetchHistory = async () => {
       try {
@@ -28,15 +31,46 @@ export const History = () => {
     }
   });
 
+  const deleteHistoryItem = async (itemId: string) => {
+    try {
+      console.log('Deleting item with ID:', itemId);
+      const updatedHistory = history.filter(item => item.id !== itemId);
+      await AsyncStorage.setItem(
+        AUDIT_DATA_ASYNC_KEY,
+        JSON.stringify(updatedHistory),
+      );
+      setHistory(updatedHistory);
+      setModalItem(null);
+    } catch (error) {
+      console.error('Error deleting history item:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {history && history.length ? (
         history.map((item, index) => (
           <Fragment key={`history-item-${index}`}>
             <List.Item
-              title={item.employeeDetails?.name}
+              title={
+                <Text
+                  variant="titleMedium"
+                  onPress={() => setModalItem(item)}
+                >{`Employee: ${item.employeeDetails?.name}`}</Text>
+              }
               description={`Designation: ${item.employeeDetails?.designation}`}
-              onPress={() => setModalItem(item)}
+              right={() =>
+                canUserDelete ? (
+                  <TouchableOpacity
+                    onPress={() => deleteHistoryItem(item.id)}
+                    style={{ padding: 8 }}
+                  >
+                    <Text variant="labelLarge" style={{ color: 'red' }}>
+                      Delete
+                    </Text>
+                  </TouchableOpacity>
+                ) : null
+              }
             />
             {index < history.length - 1 && <Divider key={`divider-${index}`} />}
           </Fragment>
@@ -60,8 +94,14 @@ export const History = () => {
             )}`}
           />
           <List.Item
-            title={`Performance Rating: ${modalItem.review?.performanceRating} ⭐️`}
+            title={`Performance Rating: ${
+              modalItem.review?.performanceRating || 0
+            } ⭐️`}
             description={modalItem.review?.comments || 'No comments'}
+          />
+          <List.Item
+            title="Review done at"
+            description={new Date(modalItem.timestamp).toLocaleString()}
           />
           <View style={styles.imageContainer}>
             <Text variant="titleMedium">Review Photo</Text>
