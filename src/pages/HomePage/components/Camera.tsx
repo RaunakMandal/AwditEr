@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   captureButton: {
     position: 'absolute',
-    bottom: 20,
+    top: 20,
     alignSelf: 'center',
     backgroundColor: '#000',
     paddingHorizontal: 16,
