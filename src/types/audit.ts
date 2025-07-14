@@ -16,7 +16,7 @@ export type T_Audit = {
 
   review: {
     performanceRating: number;
-    photoBase64: string;
+    photoUri: string;
     comments?: string;
   };
 };

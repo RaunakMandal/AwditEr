@@ -1,12 +1,19 @@
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import { LoginPage } from './pages/LoginPage';
-import { AuthProvider, useAuth } from './AuthContext';
 import { HomePage } from './pages/HomePage';
+import { UserProvider, useUserContext } from './UserContext';
+import { useEffect } from 'react';
+import { requestImagePermission } from './components/Permissions';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const AppContent = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  const { user } = useAuth();
+  const { user } = useUserContext();
+
+  useEffect(() => {
+    requestImagePermission();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -24,10 +31,14 @@ const styles = StyleSheet.create({
 
 export default function App() {
   return (
-    <PaperProvider>
-      <AuthProvider>
+    <PaperProvider
+      settings={{
+        icon: props => <AntDesign {...props} />,
+      }}
+    >
+      <UserProvider>
         <AppContent />
-      </AuthProvider>
+      </UserProvider>
     </PaperProvider>
   );
 }

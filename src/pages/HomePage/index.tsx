@@ -1,14 +1,14 @@
 import React, { JSX, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { BottomNavigation, Provider } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/AntDesign';
-import { ROUTES } from '../../utils/constants/routes';
+import { ROUTE_TO_ICON_MAP, ROUTES } from '../../utils/constants/routes';
 import { convertToTitleCase } from '../../utils/functions';
 import { isUserAllowedForRoute } from '../../utils/functions/user';
 import { Settings } from './components/Settings';
 import { History } from './components/History';
 import { Audit } from './components/Audit';
 import { T_User } from '../../types/user';
+import Icon from 'react-native-vector-icons/AntDesign';
 
 export type T_Route = {
   key: (typeof ROUTES)[number];
@@ -25,7 +25,7 @@ export const HomePage = ({ user }: { user: T_User }) => {
     ).map(route => ({
       key: route,
       title: convertToTitleCase(route),
-      icon: <Icon name={route} size={24} />,
+      icon: <Icon name={ROUTE_TO_ICON_MAP[route]} size={24} />,
     }));
 
     return availableRoutes;

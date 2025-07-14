@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   Button,
+  HelperText,
   SegmentedButtons,
   Snackbar,
   TextInput,
@@ -17,6 +18,7 @@ export const LoginPage = () => {
     handleFormSubmit,
     errorMessage,
     setShowErrorMessage,
+    formErrors,
   } = useLoginPage();
 
   return (
@@ -25,12 +27,20 @@ export const LoginPage = () => {
         label="Email"
         value={form.email}
         onChangeText={text => handleFormChange('email', text)}
+        error={formErrors.includes('email')}
       />
+      {formErrors.includes('email') && (
+        <HelperText type="error">Email is required</HelperText>
+      )}
       <TextInput
         label="Password"
         value={form.password}
         onChangeText={text => handleFormChange('password', text)}
+        error={formErrors.includes('password')}
       />
+      {formErrors.includes('password') && (
+        <HelperText type="error">Password is required</HelperText>
+      )}
       <SegmentedButtons
         value={form.roles[0]}
         onValueChange={value => handleFormChange('roles', [value])}

@@ -1,13 +1,53 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Checkbox, List, Text } from 'react-native-paper';
+import { Button, Checkbox, HelperText, List, Text } from 'react-native-paper';
 import { T_Audit } from '../../../types/audit';
 import { TextInput } from 'react-native-paper';
 import { CameraView } from './Camera';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AUDIT_DATA_ASYNC_KEY } from '../../../utils/constants';
+import { Rating } from 'react-native-ratings';
 
 export const Audit = () => {
   const [expandedId, setExpandedId] = useState<string>('details');
-  const [auditData, setAuditData] = useState<Partial<T_Audit> | null>(null);
+  const [auditData, setAuditData] = useState<Partial<T_Audit> | null>();
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (photoUri) {
+      setAuditData((prevData: Partial<T_Audit>) => {
+        return {
+          ...prevData,
+          review: {
+            ...prevData?.review,
+            photoUri,
+          },
+        };
+      });
+    }
+  }, [photoUri]);
+
+  const handleFormErrors = () => {
+    const newErrors: string[] = [];
+    if (!auditData?.employeeDetails?.name) {
+      newErrors.push('employee_name');
+    }
+    if (!auditData?.employeeDetails?.designation) {
+      newErrors.push('employee_designation');
+    }
+    if (!auditData?.lastSprintDetails?.sprintName) {
+      newErrors.push('last_sprint_name');
+    }
+    if (!auditData?.review?.comments) {
+      newErrors.push('review_comments');
+    }
+    console.log('Form errors:', newErrors);
+    setErrors(newErrors);
+
+    return newErrors.length === 0;
+  };
 
   const handleFormInputChange = (field: keyof T_Audit, value: any) => {
     setAuditData(prevData => ({
@@ -15,6 +55,62 @@ export const Audit = () => {
       [field]: value,
     }));
   };
+
+  const toggleTask = (task: string) => {
+    const currentTasks = auditData?.lastSprintDetails?.completedTasks || [];
+
+    const updatedTasks = currentTasks.includes(task)
+      ? currentTasks.filter(t => t !== task)
+      : [...currentTasks, task];
+
+    handleFormInputChange('lastSprintDetails', {
+      ...auditData?.lastSprintDetails,
+      completedTasks: updatedTasks,
+    });
+  };
+
+  const isChecked = (task: string) =>
+    auditData?.lastSprintDetails?.completedTasks?.includes(task) ?? false;
+
+  const ratingChanged = (rating: number) => {
+    setAuditData((prevData: Partial<T_Audit>) => ({
+      ...prevData,
+      review: {
+        ...(prevData?.review ?? {}),
+        performanceRating: rating,
+      },
+    }));
+  };
+
+  const saveAuditData = async () => {
+    try {
+      if (!handleFormErrors()) {
+        console.log('Form validation failed:', errors);
+        setTimeout(() => {
+          setErrors([]);
+        }, 3000);
+        return;
+      }
+      const getExistingData = await AsyncStorage.getItem(AUDIT_DATA_ASYNC_KEY);
+      const existingData: T_Audit[] = getExistingData
+        ? JSON.parse(getExistingData)
+        : [];
+
+      console.log('Existing audit data:', existingData);
+      await AsyncStorage.setItem(
+        AUDIT_DATA_ASYNC_KEY,
+        JSON.stringify([...existingData, auditData]),
+      );
+      console.log(JSON.stringify([...existingData, auditData]));
+      console.log('Audit data saved successfully');
+
+      // Reset the form after saving
+      setAuditData(null);
+    } catch (error) {
+      console.error('Error saving audit data:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text variant="titleMedium">Employee Review</Text>
@@ -23,7 +119,11 @@ export const Audit = () => {
           expandedId={expandedId}
           onAccordionPress={id => setExpandedId(id as string)}
         >
-          <List.Accordion title="Employee Details" id="details">
+          <List.Accordion
+            title="Employee Details"
+            id="details"
+            style={styles.listItem}
+          >
             <TextInput
               label="Employee Name"
               value={auditData?.employeeDetails?.name || ''}
@@ -33,7 +133,12 @@ export const Audit = () => {
                   name: text,
                 })
               }
+              error={errors.includes('employee_name')}
+              style={styles.inputField}
             />
+            {errors.includes('employee_name') && (
+              <HelperText type="error">Employee Name is required</HelperText>
+            )}
             <TextInput
               label="Employee Designation"
               value={auditData?.employeeDetails?.designation || ''}
@@ -43,9 +148,20 @@ export const Audit = () => {
                   designation: text,
                 })
               }
+              style={styles.inputField}
+              error={errors.includes('employee_designation')}
             />
+            {errors.includes('employee_designation') && (
+              <HelperText type="error">
+                Employee Designation is required
+              </HelperText>
+            )}
           </List.Accordion>
-          <List.Accordion title="Last Sprint Details" id="sprint">
+          <List.Accordion
+            title="Last Sprint Details"
+            id="sprint"
+            style={styles.listItem}
+          >
             <TextInput
               label="Sprint Name"
               value={auditData?.lastSprintDetails?.sprintName || ''}
@@ -55,25 +171,27 @@ export const Audit = () => {
                   sprintName: text,
                 })
               }
+              style={styles.inputField}
+              error={errors.includes('last_sprint_name')}
             />
-            <TextInput
-              label="Completed Tasks"
-              value={
-                auditData?.lastSprintDetails?.completedTasks.join(', ') || ''
-              }
-              onChangeText={text =>
-                handleFormInputChange('lastSprintDetails', {
-                  ...auditData?.lastSprintDetails,
-                  completedTasks: text.split(',').map(task => task.trim()),
-                })
-              }
+            {errors.includes('last_sprint_name') && (
+              <HelperText type="error">Sprint Name is required</HelperText>
+            )}
+
+            <Checkbox.Item
+              label="Task 1 Completed"
+              status={isChecked('task1') ? 'checked' : 'unchecked'}
+              onPress={() => toggleTask('task1')}
+              style={styles.inputField}
+            />
+            <Checkbox.Item
+              label="Task 2 Completed"
+              status={isChecked('task2') ? 'checked' : 'unchecked'}
+              onPress={() => toggleTask('task2')}
+              style={styles.inputField}
             />
           </List.Accordion>
-          <List.Accordion title="Review" id="review">
-            <Checkbox.Item label="Task 1" status="checked" />
-            <Checkbox.Item label="Task 2" status="unchecked" />
-            <Checkbox.Item label="Task 3" status="unchecked" />
-
+          <List.Accordion title="Review" id="review" style={styles.listItem}>
             <TextInput
               label="Additional Comments"
               value={auditData?.review?.comments || ''}
@@ -83,17 +201,25 @@ export const Audit = () => {
                   comments: text,
                 })
               }
+              style={styles.inputField}
             />
-
-            <CameraView />
+            {errors.includes('review_comments') && (
+              <HelperText type="info">
+                Please provide a performance rating.
+              </HelperText>
+            )}
+            <View style={styles.inputField}>
+              <Text variant="bodyMedium">Performance Rating (1-5):</Text>
+              <Rating
+                showRating={false}
+                onFinishRating={(rating: number) => ratingChanged(rating)}
+              />
+            </View>
+            <CameraView setPhotoUri={setPhotoUri} />
           </List.Accordion>
         </List.AccordionGroup>
       </View>
-      <Button
-        mode="contained"
-        onPress={() => console.log('Submit Review')}
-        style={{ marginTop: 16, marginBottom: 16 }}
-      >
+      <Button mode="contained" onPress={saveAuditData}>
         Submit Review
       </Button>
     </View>
@@ -110,6 +236,12 @@ const styles = StyleSheet.create({
   formList: {
     flex: 1,
     gap: 16,
+    marginTop: 16,
+  },
+  listItem: {
+    backgroundColor: '#bdc3c7',
+  },
+  inputField: {
     marginTop: 16,
   },
 });

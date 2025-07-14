@@ -7,3 +7,9 @@ export const ROUTES = [
   ROUTE_AUDIT_HISTORY,
   ROUTE_SETTINGS,
 ] as const;
+
+export const ROUTE_TO_ICON_MAP = {
+  [ROUTE_AUDIT_FORM]: 'audit',
+  [ROUTE_AUDIT_HISTORY]: 'history',
+  [ROUTE_SETTINGS]: 'setting',
+};
