@@ -1,97 +1,32 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# AwditEr
+Simple React Native Application to Store Audited data in Local Storage and Role based access
 
-# Getting Started
+## App Setup
+1. Download the .apk file from the drive link [Drive Link](https://drive.google.com/drive/folders/1DYZhxkxdlkV_pEnAWA0eEueJSmOWRX18?usp=sharing)
+2. Install the APK on your device and follow the below steps.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+### Setup with React Native
+1. Clone the repository
+2. Run `npm install` in the root directory
+3. `cd ios` and then run `pod install`
+4. Come back to root directory and run `npm run android` or `npm run ios`
 
-## Step 1: Start Metro
+## Flow
+1. User signs in with credentials and role.
+2. Auditor creates a new audit.
+3. Viewer can only see the previous audits and audit rules.
+4. Admin can view existing audits, delete audits, and see audit rules.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### Login credentials
+Auditor and Viewer: auditor@example.com<br />
+Viewer: viewer@example.com<br />
+Admin: admin@example.com<br />
+Only Auditor: auditor2@example.com<br />
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Password: `123456`
 
-```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Architecture
+This application uses Local storage for persistence and React Context for universal state management.<br />
+Persistence was required to store user login credentials between app openings and context is for all the in-app state.<br />
+I have used a permission based access control where a user can have multiple access levels and they are matched when logging the user in and also for different tasks. This can later also be integrated on each API call, actions, etc.<br />
+I have also used a local DB to store user data, and definitely some constant variables to store the user details.
